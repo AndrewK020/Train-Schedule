@@ -7,6 +7,7 @@ var config = {
     storageBucket: "train-schedule-abc88.appspot.com",
     messagingSenderId: "990093861781"
   };
+  
   firebase.initializeApp(config);
 
   var database = firebase.database().ref();
@@ -16,9 +17,6 @@ var config = {
 
 
 $(document).ready(function() {
-
-
-
 
     $("#submitBtn").on("click", function(e) {
         e.preventDefault();
@@ -46,22 +44,21 @@ $(document).ready(function() {
             $("#frequency").val("");
         }
     });
-
-
-
 });
 
 
 function createTable(trainList) {
     
     trainList.forEach(train => {
+        var futureTimes = getNextArrival(train);
+
         var newRow = $("<tr>");
 
         var name = $("<td>").text(train.name);
         var destination = $("<td>").text(train.destination);
         var frequency = $("<td>").text(train.frequency);
-        var nextArrival = $("<td>").text("");
-        var minutesAway = $("<td>").text("");
+        var nextArrival = $("<td>").text(futureTimes.nextArrival);
+        var minutesAway = $("<td>").text(futureTimes.minutesAway);
 
         $(newRow).append(name);
         $(newRow).append(destination);
@@ -70,8 +67,10 @@ function createTable(trainList) {
         $(newRow).append(minutesAway);
 
         $("#schedule").append(newRow);
+        
     });
 }
+
 
 
 database.on("value", function(snapshot){
@@ -80,3 +79,26 @@ database.on("value", function(snapshot){
     scheduleArr = snapshot.val();
     createTable(scheduleArr);
 });
+
+
+function getNextArrival(train) {
+    var currentTime = moment();
+    var startTime = train.time;
+    var timeBetween = moment.utc(moment(currentTime, "hh:mm").diff(moment(startTime, "hh:mm")));
+
+
+    var minutes = (timeBetween.hour()*60 + timeBetween.minutes());
+
+    while (minutes > train.frequency) {
+        minutes -= train.frequency;
+    }
+
+    const now = new Date()
+    const nextArrival = moment(now).add(minutes, "minutes").format("hh:mm a");
+
+    return time = {
+        nextArrival: nextArrival,
+        minutesAway: minutes
+    };
+
+}
