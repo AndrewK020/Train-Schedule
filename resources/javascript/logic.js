@@ -44,7 +44,12 @@ $(document).ready(function() {
             $("#frequency").val("");
         }
     });
+
+    $(document).on("click", ".fas", function() {
+        console.log("here");
+    })
 });
+
 
 
 function createTable(trainList) {
@@ -59,12 +64,14 @@ function createTable(trainList) {
         var frequency = $("<td>").text(train.frequency);
         var nextArrival = $("<td>").text(futureTimes.nextArrival);
         var minutesAway = $("<td>").text(futureTimes.minutesAway);
+        var deletBtn = $("<i class='fas fa-times'></i>").attr("id", trainList.indexOf(train));
 
         $(newRow).append(name);
         $(newRow).append(destination);
         $(newRow).append(frequency);
         $(newRow).append(nextArrival);
         $(newRow).append(minutesAway);
+        $(newRow).append(deletBtn);
 
         $("#schedule").append(newRow);
         

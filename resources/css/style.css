@@ -2,8 +2,6 @@ body {
     background-image: url(../images/ws_Train_station_2560x1440.jpg);
 }
 
-
-
 h1 {
     text-align: center;
 }
@@ -26,6 +24,11 @@ h3 {
     margin-top: 30px;
     background-color: rosybrown;
     color: darkslategrey;
+}
+.fas:hover {
+    color: red;
+    cursor: pointer;
+
 }
 #table {
     border: gray;
