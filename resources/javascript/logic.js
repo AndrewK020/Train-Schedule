@@ -7,7 +7,7 @@ var config = {
     storageBucket: "train-schedule-abc88.appspot.com",
     messagingSenderId: "990093861781"
   };
-  
+
   firebase.initializeApp(config);
 
   var database = firebase.database().ref();
@@ -75,30 +75,42 @@ function createTable(trainList) {
 
 database.on("value", function(snapshot){
     $("#schedule").empty();
-    console.log(snapshot.val());
     scheduleArr = snapshot.val();
     createTable(scheduleArr);
 });
 
 
-function getNextArrival(train) {
+function getNextArrival(getTrain) {
+
     var currentTime = moment();
-    var startTime = train.time;
-    var timeBetween = moment.utc(moment(currentTime, "hh:mm").diff(moment(startTime, "hh:mm")));
+    var startTime = getTrain.time;
+    var timeBetween = moment.utc(moment(currentTime, "HH:mm").diff(moment(startTime, "HH:mm")));
+    
+    var minutes = (moment(timeBetween).hour()*60 + timeBetween.minutes());
 
-
-    var minutes = (timeBetween.hour()*60 + timeBetween.minutes());
-
-    while (minutes > train.frequency) {
-        minutes -= train.frequency;
+    var lastArrival = moment(startTime, "HH:mm");
+    while (minutes > getTrain.frequency) {
+        minutes = minutes - getTrain.frequency;
+        lastArrival = moment(lastArrival).add(getTrain.frequency, "minutes");
+        
     }
 
-    const now = new Date()
-    const nextArrival = moment(now).add(minutes, "minutes").format("hh:mm a");
+    var nextMoment = moment(lastArrival).add(getTrain.frequency, "minutes");
+    var nextArrival = nextMoment.format("hh:mm a");
+    var time = moment(currentTime).format("hh:mm a");
 
+    if (time === nextArrival) {
+        var minutesAway = 0;
+    }
+
+    else {
+        var minutesAway = moment(moment(nextMoment).diff(moment(currentTime)));
+        minutesAway = moment(minutesAway).minutes() + 1;
+    }
+    
     return time = {
         nextArrival: nextArrival,
-        minutesAway: minutes
+        minutesAway: minutesAway
     };
 
 }
