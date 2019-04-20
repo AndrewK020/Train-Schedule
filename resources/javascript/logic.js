@@ -45,15 +45,38 @@ $(document).ready(function() {
         }
     });
 
-    $(document).on("click", ".fas", function() {
-        console.log("here");
+    //delete button
+    $(document).on("click", ".fas", function() { 
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            
+            if (result.value) {
+                let index = $(this).attr("index");
+                scheduleArr.splice(index,1);
+                database.set(scheduleArr);
+               
+                Swal.fire(
+                    'Deleted!',
+                    'The train has been deleted.',
+                    'success'
+                );
+            }
+          })
     })
 });
 
 
 
 function createTable(trainList) {
-    
+    $("#schedule").empty();
+
     trainList.forEach(train => {
         var futureTimes = getNextArrival(train);
 
@@ -64,7 +87,7 @@ function createTable(trainList) {
         var frequency = $("<td>").text(train.frequency);
         var nextArrival = $("<td>").text(futureTimes.nextArrival);
         var minutesAway = $("<td>").text(futureTimes.minutesAway);
-        var deletBtn = $("<i class='fas fa-times'></i>").attr("id", trainList.indexOf(train));
+        var deletBtn = $("<i class='fas fa-times'></i>").attr("index", trainList.indexOf(train));
 
         $(newRow).append(name);
         $(newRow).append(destination);
@@ -81,7 +104,6 @@ function createTable(trainList) {
 
 
 database.on("value", function(snapshot){
-    $("#schedule").empty();
     scheduleArr = snapshot.val();
     createTable(scheduleArr);
 });
@@ -96,6 +118,7 @@ function getNextArrival(getTrain) {
     var minutes = (moment(timeBetween).hour()*60 + timeBetween.minutes());
 
     var lastArrival = moment(startTime, "HH:mm");
+    
     while (minutes > getTrain.frequency) {
         minutes = minutes - getTrain.frequency;
         lastArrival = moment(lastArrival).add(getTrain.frequency, "minutes");
